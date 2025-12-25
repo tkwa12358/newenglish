@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Upload, FileVideo, FileText, Play, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Upload, FileVideo, FileText, Play, ArrowLeft, CheckCircle, Eye, EyeOff, Clock, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { parseSRT, Subtitle } from '@/lib/supabase';
@@ -24,17 +24,21 @@ const LocalLearn: React.FC = () => {
   const [subtitlesCn, setSubtitlesCn] = useState<Subtitle[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [currentSubtitle, setCurrentSubtitle] = useState<Subtitle | null>(null);
-  const [showAssessment, setShowAssessment] = useState(false);
-  const [assessmentText, setAssessmentText] = useState('');
+  const [showTranslation, setShowTranslation] = useState(true);
+  const [practiceSubtitle, setPracticeSubtitle] = useState<Subtitle | null>(null);
+  const [practiceSubtitleIndex, setPracticeSubtitleIndex] = useState<number | null>(null);
   const [showWordLookup, setShowWordLookup] = useState(false);
   const [lookupWord, setLookupWord] = useState('');
   const [lookupContext, setLookupContext] = useState('');
   const [isLearning, setIsLearning] = useState(false);
+  const [completedSentences, setCompletedSentences] = useState<number[]>([]);
+  const [practiceTime, setPracticeTime] = useState(0);
+  const practiceStartRef = useRef<number | null>(null);
 
   const videoInputRef = useRef<HTMLInputElement>(null);
   const srtEnInputRef = useRef<HTMLInputElement>(null);
   const srtCnInputRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoPlayerRef = useRef<HTMLVideoElement | null>(null);
 
   const handleVideoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -105,21 +109,52 @@ const LocalLearn: React.FC = () => {
   }, [subtitlesEn, subtitlesCn]);
 
   const handleSeek = useCallback((time: number) => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = time;
+    // Video seek is handled by VideoPlayer component's internal ref
+    // We just need to update the time for subtitle sync
+  }, []);
+
+  const handlePractice = useCallback((subtitle: Subtitle, index: number) => {
+    setPracticeSubtitle(subtitle);
+    setPracticeSubtitleIndex(index);
+    if (!practiceStartRef.current) {
+      practiceStartRef.current = Date.now();
     }
   }, []);
 
-  const handlePractice = useCallback((subtitle: Subtitle) => {
-    setAssessmentText(subtitle.text);
-    setShowAssessment(true);
-  }, []);
+  const handleAssessmentSuccess = useCallback((score: number) => {
+    if (practiceSubtitleIndex !== null && score >= 60) {
+      setCompletedSentences(prev => {
+        if (prev.includes(practiceSubtitleIndex)) return prev;
+        return [...prev, practiceSubtitleIndex].sort((a, b) => a - b);
+      });
+    }
+    // Update practice time
+    if (practiceStartRef.current) {
+      const elapsed = Math.floor((Date.now() - practiceStartRef.current) / 1000);
+      setPracticeTime(prev => prev + elapsed);
+      practiceStartRef.current = Date.now();
+    }
+  }, [practiceSubtitleIndex]);
 
   const handleWordClick = useCallback((word: string, context: string) => {
     setLookupWord(word);
     setLookupContext(context);
     setShowWordLookup(true);
   }, []);
+
+  const formatPracticeTime = useCallback(() => {
+    const totalSeconds = practiceTime;
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}小时${minutes}分钟`;
+    } else if (minutes > 0) {
+      return `${minutes}分钟${seconds}秒`;
+    }
+    return `${seconds}秒`;
+  }, [practiceTime]);
 
   const startLearning = useCallback(() => {
     if (!videoUrl) {
@@ -138,6 +173,7 @@ const LocalLearn: React.FC = () => {
       return;
     }
     setIsLearning(true);
+    practiceStartRef.current = Date.now();
   }, [videoUrl, subtitlesEn.length, toast]);
 
   if (isLearning) {
@@ -149,14 +185,39 @@ const LocalLearn: React.FC = () => {
         <div className="min-h-screen gradient-bg dark:gradient-bg-dark">
           <Header />
           <main className="container mx-auto px-4 py-6">
-            <Button
-              variant="ghost"
-              onClick={() => setIsLearning(false)}
-              className="mb-4 rounded-xl hover:bg-accent/50"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              返回上传
-            </Button>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsLearning(false)}
+                  className="rounded-xl hover:bg-accent/50"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  返回上传
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTranslation(!showTranslation)}
+                  className="rounded-xl hover:bg-accent/50"
+                >
+                  {showTranslation ? <EyeOff className="w-4 h-4 mr-1" /> : <Eye className="w-4 h-4 mr-1" />}
+                  {showTranslation ? '隐藏翻译' : '显示翻译'}
+                </Button>
+              </div>
+              
+              {/* 学习进度指示器 */}
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  <span>{formatPracticeTime()}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <CheckCircle2 className="w-4 h-4 text-primary" />
+                  <span>{completedSentences.length}/{subtitlesEn.length} 句</span>
+                </div>
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
@@ -168,6 +229,7 @@ const LocalLearn: React.FC = () => {
                     currentSubtitle={currentSubtitle}
                     onTimeUpdate={handleTimeUpdate}
                     onSubtitleClick={(subtitle) => handleSeek(subtitle.start)}
+                    showTranslation={showTranslation}
                   />
                 </div>
               </div>
@@ -177,17 +239,26 @@ const LocalLearn: React.FC = () => {
                   subtitlesCn={subtitlesCn}
                   currentSubtitle={currentSubtitle}
                   onSubtitleClick={(subtitle) => handleSeek(subtitle.start)}
-                  onPractice={handlePractice}
+                  onPractice={(subtitle) => {
+                    const index = subtitlesEn.findIndex(s => s === subtitle);
+                    handlePractice(subtitle, index);
+                  }}
                   onAddWord={handleWordClick}
+                  showTranslation={showTranslation}
+                  completedSentences={completedSentences}
                 />
               </div>
             </div>
           </main>
 
-          {showAssessment && (
+          {practiceSubtitle && (
             <VoiceAssessment
-              originalText={assessmentText}
-              onClose={() => setShowAssessment(false)}
+              originalText={practiceSubtitle.text}
+              onClose={() => {
+                setPracticeSubtitle(null);
+                setPracticeSubtitleIndex(null);
+              }}
+              onSuccess={handleAssessmentSuccess}
             />
           )}
 
