@@ -30,7 +30,7 @@ export const useLearningProgress = (videoId: string | null) => {
       .select('*')
       .eq('user_id', user.id)
       .eq('video_id', videoId)
-      .single();
+      .maybeSingle();
 
     if (!error && data) {
       setProgress(data as LearningProgress);

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { BookOpen, Settings, LogOut, Menu, X, Mic, Key } from 'lucide-react';
+import { BookOpen, Settings, LogOut, Menu, X, Mic, Key, BarChart3 } from 'lucide-react';
 import { useState } from 'react';
 import RedeemCode from './RedeemCode';
 
@@ -38,6 +38,12 @@ export const Header = () => {
                 <Button variant="ghost" className="rounded-xl hover:bg-accent/50">
                   <BookOpen className="w-4 h-4 mr-2" />
                   单词本
+                </Button>
+              </Link>
+              <Link to="/statistics">
+                <Button variant="ghost" className="rounded-xl hover:bg-accent/50">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  学习统计
                 </Button>
               </Link>
               <Link to="/local-learn">
@@ -98,6 +104,12 @@ export const Header = () => {
                   <Button variant="ghost" className="w-full justify-start rounded-xl">
                     <BookOpen className="w-4 h-4 mr-2" />
                     单词本
+                  </Button>
+                </Link>
+                <Link to="/statistics" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start rounded-xl">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    学习统计
                   </Button>
                 </Link>
                 <Link to="/local-learn" onClick={() => setMobileMenuOpen(false)}>

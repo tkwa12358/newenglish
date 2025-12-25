@@ -11,6 +11,7 @@ import Register from "./pages/Register";
 import Learn from "./pages/Learn";
 import LocalLearn from "./pages/LocalLearn";
 import WordBook from "./pages/WordBook";
+import Statistics from "./pages/Statistics";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminVideos from "./pages/admin/Videos";
@@ -46,6 +47,7 @@ const AppRoutes = () => (
     <Route path="/learn/:videoId" element={<ProtectedRoute><Learn /></ProtectedRoute>} />
     <Route path="/local-learn" element={<ProtectedRoute><LocalLearn /></ProtectedRoute>} />
     <Route path="/wordbook" element={<ProtectedRoute><WordBook /></ProtectedRoute>} />
+    <Route path="/statistics" element={<ProtectedRoute><Statistics /></ProtectedRoute>} />
     <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
     <Route path="/admin/videos" element={<AdminRoute><AdminVideos /></AdminRoute>} />
     <Route path="/admin/categories" element={<AdminRoute><AdminCategories /></AdminRoute>} />
