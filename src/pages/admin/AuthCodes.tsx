@@ -48,7 +48,7 @@ const AdminAuthCodes: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    code_type: '10min',
+    code_type: 'pro_10min',
     count: 1,
     expires_days: 30,
   });
@@ -70,11 +70,9 @@ const AdminAuthCodes: React.FC = () => {
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + data.expires_days);
       
-      // 根据类型确定分钟数
+      // 根据类型确定分钟数（只有专业评测）
       let minutesAmount = 0;
-      if (data.code_type === '10min') minutesAmount = 10;
-      else if (data.code_type === '60min') minutesAmount = 60;
-      else if (data.code_type === 'pro_10min') minutesAmount = 10;
+      if (data.code_type === 'pro_10min') minutesAmount = 10;
       else if (data.code_type === 'pro_30min') minutesAmount = 30;
       else if (data.code_type === 'pro_60min') minutesAmount = 60;
       
@@ -94,7 +92,7 @@ const AdminAuthCodes: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-auth-codes'] });
       toast({ title: `成功创建 ${formData.count} 个授权码` });
       setIsOpen(false);
-      setFormData({ code_type: '10min', count: 1, expires_days: 30 });
+      setFormData({ code_type: 'pro_10min', count: 1, expires_days: 30 });
     },
     onError: (error) => {
       toast({ title: '创建失败', description: error.message, variant: 'destructive' });
@@ -125,6 +123,19 @@ const AdminAuthCodes: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createMutation.mutate(formData);
+  };
+
+  const getCodeTypeLabel = (codeType: string) => {
+    switch (codeType) {
+      case 'pro_10min': return '专业评测 10分钟';
+      case 'pro_30min': return '专业评测 30分钟';
+      case 'pro_60min': return '专业评测 60分钟';
+      case 'registration': return '注册';
+      // 兼容旧数据
+      case '10min': return '(旧)普通 10分钟';
+      case '60min': return '(旧)普通 60分钟';
+      default: return codeType;
+    }
   };
 
   return (
@@ -158,8 +169,6 @@ const AdminAuthCodes: React.FC = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="10min">普通评测 10分钟</SelectItem>
-                      <SelectItem value="60min">普通评测 60分钟</SelectItem>
                       <SelectItem value="pro_10min">专业评测 10分钟</SelectItem>
                       <SelectItem value="pro_30min">专业评测 30分钟</SelectItem>
                       <SelectItem value="pro_60min">专业评测 60分钟</SelectItem>
@@ -211,14 +220,7 @@ const AdminAuthCodes: React.FC = () => {
             {authCodes.map((code) => (
               <TableRow key={code.id}>
                 <TableCell className="font-mono">{code.code}</TableCell>
-                <TableCell>
-                  {(code.code_type as string) === '10min' && '普通 10分钟'}
-                  {(code.code_type as string) === '60min' && '普通 60分钟'}
-                  {(code.code_type as string) === 'pro_10min' && '专业 10分钟'}
-                  {(code.code_type as string) === 'pro_30min' && '专业 30分钟'}
-                  {(code.code_type as string) === 'pro_60min' && '专业 60分钟'}
-                  {(code.code_type as string) === 'registration' && '注册'}
-                </TableCell>
+                <TableCell>{getCodeTypeLabel(code.code_type as string)}</TableCell>
                 <TableCell>{code.minutes_amount || '-'} 分钟</TableCell>
                 <TableCell>
                   <span

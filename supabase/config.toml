@@ -1,13 +1,13 @@
 project_id = "clsbvccuxhcgzvjmmsph"
 
-[functions.voice-assessment]
-verify_jwt = true
-
 [functions.professional-assessment]
 verify_jwt = true
 
 [functions.translate]
 verify_jwt = false
+
+[functions.import-dictionary]
+verify_jwt = true
 
 [functions.redeem-code]
 verify_jwt = true

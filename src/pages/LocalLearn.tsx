@@ -1,7 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Upload, FileVideo, FileText, Play, ArrowLeft, CheckCircle, Eye, EyeOff, Clock, CheckCircle2 } from 'lucide-react';
@@ -11,7 +10,7 @@ import { parseSRT, Subtitle } from '@/lib/supabase';
 import { Header } from '@/components/Header';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { SubtitleList } from '@/components/SubtitleList';
-import { VoiceAssessment } from '@/components/VoiceAssessment';
+import { ProfessionalAssessment } from '@/components/ProfessionalAssessment';
 import { WordLookup } from '@/components/WordLookup';
 
 const LocalLearn: React.FC = () => {
@@ -38,7 +37,6 @@ const LocalLearn: React.FC = () => {
   const videoInputRef = useRef<HTMLInputElement>(null);
   const srtEnInputRef = useRef<HTMLInputElement>(null);
   const srtCnInputRef = useRef<HTMLInputElement>(null);
-  const videoPlayerRef = useRef<HTMLVideoElement | null>(null);
 
   const handleVideoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -110,7 +108,6 @@ const LocalLearn: React.FC = () => {
 
   const handleSeek = useCallback((time: number) => {
     // Video seek is handled by VideoPlayer component's internal ref
-    // We just need to update the time for subtitle sync
   }, []);
 
   const handlePractice = useCallback((subtitle: Subtitle, index: number) => {
@@ -252,7 +249,7 @@ const LocalLearn: React.FC = () => {
           </main>
 
           {practiceSubtitle && (
-            <VoiceAssessment
+            <ProfessionalAssessment
               originalText={practiceSubtitle.text}
               onClose={() => {
                 setPracticeSubtitle(null);
