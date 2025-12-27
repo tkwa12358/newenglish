@@ -24,22 +24,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Pencil, Clock } from 'lucide-react';
+import { Pencil, Crown } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase, Profile } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { format } from 'date-fns';
+
+interface ExtendedProfile {
+  id: string;
+  user_id: string;
+  phone: string | null;
+  display_name: string | null;
+  avatar_url: string | null;
+  role: 'user' | 'admin';
+  professional_voice_minutes: number;
+  created_at: string;
+  updated_at: string;
+}
 
 const AdminUsers: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<Profile | null>(null);
+  const [editingUser, setEditingUser] = useState<ExtendedProfile | null>(null);
   const [formData, setFormData] = useState({
     display_name: '',
     role: 'user',
-    voice_minutes: 0,
+    professional_voice_minutes: 0,
   });
 
   const { data: users = [] } = useQuery({
@@ -49,7 +61,7 @@ const AdminUsers: React.FC = () => {
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
-      return data as Profile[];
+      return data as ExtendedProfile[];
     },
   });
 
@@ -68,12 +80,12 @@ const AdminUsers: React.FC = () => {
     },
   });
 
-  const handleEdit = (user: Profile) => {
+  const handleEdit = (user: ExtendedProfile) => {
     setEditingUser(user);
     setFormData({
       display_name: user.display_name || '',
       role: user.role,
-      voice_minutes: user.voice_minutes,
+      professional_voice_minutes: user.professional_voice_minutes || 0,
     });
     setIsOpen(true);
   };
@@ -100,7 +112,7 @@ const AdminUsers: React.FC = () => {
               <TableHead>手机号</TableHead>
               <TableHead>昵称</TableHead>
               <TableHead>角色</TableHead>
-              <TableHead>语音时长</TableHead>
+              <TableHead>专业评测时长</TableHead>
               <TableHead>注册时间</TableHead>
               <TableHead>操作</TableHead>
             </TableRow>
@@ -123,8 +135,8 @@ const AdminUsers: React.FC = () => {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {user.voice_minutes} 分钟
+                    <Crown className="h-3 w-3 text-primary" />
+                    {user.professional_voice_minutes || 0} 分钟
                   </div>
                 </TableCell>
                 <TableCell>{format(new Date(user.created_at), 'yyyy-MM-dd HH:mm')}</TableCell>
@@ -168,12 +180,12 @@ const AdminUsers: React.FC = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="voice_minutes">语音时长(分钟)</Label>
+                <Label htmlFor="professional_voice_minutes">专业评测时长(分钟)</Label>
                 <Input
-                  id="voice_minutes"
+                  id="professional_voice_minutes"
                   type="number"
-                  value={formData.voice_minutes}
-                  onChange={(e) => setFormData({ ...formData, voice_minutes: parseInt(e.target.value) || 0 })}
+                  value={formData.professional_voice_minutes}
+                  onChange={(e) => setFormData({ ...formData, professional_voice_minutes: parseInt(e.target.value) || 0 })}
                 />
               </div>
               <Button type="submit" className="w-full">

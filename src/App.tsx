@@ -12,13 +12,13 @@ import Learn from "./pages/Learn";
 import LocalLearn from "./pages/LocalLearn";
 import WordBook from "./pages/WordBook";
 import Statistics from "./pages/Statistics";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminVideos from "./pages/admin/Videos";
 import AdminCategories from "./pages/admin/Categories";
 import AdminUsers from "./pages/admin/Users";
 import AdminAuthCodes from "./pages/admin/AuthCodes";
-import AdminModels from "./pages/admin/Models";
 import AdminDictionary from "./pages/admin/Dictionary";
 import AdminProfessionalProviders from "./pages/admin/ProfessionalProviders";
 
@@ -50,12 +50,12 @@ const AppRoutes = () => (
     <Route path="/local-learn" element={<ProtectedRoute><LocalLearn /></ProtectedRoute>} />
     <Route path="/wordbook" element={<ProtectedRoute><WordBook /></ProtectedRoute>} />
     <Route path="/statistics" element={<ProtectedRoute><Statistics /></ProtectedRoute>} />
+    <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
     <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
     <Route path="/admin/videos" element={<AdminRoute><AdminVideos /></AdminRoute>} />
     <Route path="/admin/categories" element={<AdminRoute><AdminCategories /></AdminRoute>} />
     <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
     <Route path="/admin/auth-codes" element={<AdminRoute><AdminAuthCodes /></AdminRoute>} />
-    <Route path="/admin/models" element={<AdminRoute><AdminModels /></AdminRoute>} />
     <Route path="/admin/professional" element={<AdminRoute><AdminProfessionalProviders /></AdminRoute>} />
     <Route path="/admin/dictionary" element={<AdminRoute><AdminDictionary /></AdminRoute>} />
     <Route path="*" element={<NotFound />} />

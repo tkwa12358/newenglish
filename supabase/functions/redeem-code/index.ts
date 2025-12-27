@@ -73,7 +73,7 @@ serve(async (req) => {
     // 获取用户当前分钟数
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('voice_minutes, professional_voice_minutes')
+      .select('professional_voice_minutes')
       .eq('user_id', user.id)
       .single();
 
@@ -88,25 +88,10 @@ serve(async (req) => {
     const codeType = authCode.code_type as string;
     const minutesToAdd = authCode.minutes_amount || 10;
     
-    // 判断是普通评测还是专业评测
-    const isProfessional = codeType.startsWith('pro_');
-    
-    let updateData: Record<string, number>;
-    let messageType: string;
-    
-    if (isProfessional) {
-      // 专业评测充值
-      const currentMinutes = profile?.professional_voice_minutes || 0;
-      const newMinutes = currentMinutes + minutesToAdd;
-      updateData = { professional_voice_minutes: newMinutes };
-      messageType = '专业评测';
-    } else {
-      // 普通评测充值
-      const currentMinutes = profile?.voice_minutes || 0;
-      const newMinutes = currentMinutes + minutesToAdd;
-      updateData = { voice_minutes: newMinutes };
-      messageType = '普通评测';
-    }
+    // 所有充值都是专业评测
+    const currentMinutes = profile?.professional_voice_minutes || 0;
+    const newMinutes = currentMinutes + minutesToAdd;
+    const updateData = { professional_voice_minutes: newMinutes };
 
     // 更新用户分钟数
     const { error: updateProfileError } = await supabaseAdmin
@@ -135,12 +120,9 @@ serve(async (req) => {
     if (updateCodeError) {
       console.error('Update code error:', updateCodeError);
       // 回滚用户分钟数
-      const rollbackData = isProfessional 
-        ? { professional_voice_minutes: profile?.professional_voice_minutes || 0 }
-        : { voice_minutes: profile?.voice_minutes || 0 };
       await supabaseAdmin
         .from('profiles')
-        .update(rollbackData)
+        .update({ professional_voice_minutes: currentMinutes })
         .eq('user_id', user.id);
       
       return new Response(
@@ -149,18 +131,12 @@ serve(async (req) => {
       );
     }
 
-    // 获取更新后的分钟数
-    const newTotal = isProfessional 
-      ? (profile?.professional_voice_minutes || 0) + minutesToAdd
-      : (profile?.voice_minutes || 0) + minutesToAdd;
-
     return new Response(
       JSON.stringify({
         success: true,
         minutes_added: minutesToAdd,
-        total_minutes: newTotal,
-        is_professional: isProfessional,
-        message: `成功充值 ${minutesToAdd} 分钟${messageType}时间`,
+        total_minutes: newMinutes,
+        message: `成功充值 ${minutesToAdd} 分钟专业评测时间`,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

@@ -7,9 +7,7 @@ import {
   Tag,
   Users,
   Key,
-  Settings,
   ArrowLeft,
-  Cpu,
   BookOpen,
   Crown,
 } from 'lucide-react';
@@ -25,7 +23,6 @@ const navItems = [
   { path: '/admin/categories', label: '分类管理', icon: Tag },
   { path: '/admin/users', label: '用户管理', icon: Users },
   { path: '/admin/auth-codes', label: '授权码管理', icon: Key },
-  { path: '/admin/models', label: '评测模型', icon: Cpu },
   { path: '/admin/professional', label: '专业评测', icon: Crown },
   { path: '/admin/dictionary', label: '词库管理', icon: BookOpen },
 ];
