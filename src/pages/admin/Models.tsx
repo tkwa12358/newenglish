@@ -34,11 +34,13 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const PROVIDERS = [
-  { value: 'lovable', label: 'Lovable AI (内置)' },
-  { value: 'azure', label: 'Azure Speech Services' },
-  { value: 'openai', label: 'OpenAI' },
-  { value: 'openai_compatible', label: 'OpenAI兼容 (中国大陆)' },
-  { value: 'speechsuper', label: 'SpeechSuper' },
+  { value: 'lovable', label: 'Lovable AI (内置)', description: '无需配置，免费使用' },
+  { value: 'tencent', label: '腾讯云语音识别', description: '中国大陆推荐，支持实时语音评测' },
+  { value: 'aliyun', label: '阿里云智能语音', description: '中国大陆推荐，支持英语发音评测' },
+  { value: 'azure', label: 'Azure Speech Services', description: '微软语音服务' },
+  { value: 'openai', label: 'OpenAI Whisper', description: 'OpenAI 语音识别' },
+  { value: 'openai_compatible', label: 'OpenAI兼容 (中国大陆)', description: '国内 OpenAI 代理' },
+  { value: 'speechsuper', label: 'SpeechSuper', description: '专业语音评测服务' },
 ];
 
 const AdminModels: React.FC = () => {
@@ -287,9 +289,29 @@ const AdminModels: React.FC = () => {
             </CardTitle>
             <CardDescription>
               系统默认使用 Lovable AI 进行语音评测，无需额外配置。
-              如需使用其他模型，请在下方添加配置。
+              如需使用腾讯云或阿里云等服务，请在下方添加配置并设置对应的 API 密钥。
             </CardDescription>
           </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="border-2 border-border p-4">
+                <h4 className="font-bold mb-2">腾讯云语音识别</h4>
+                <ul className="space-y-1 text-muted-foreground">
+                  <li>• API端点: asr.tencentcloudapi.com</li>
+                  <li>• 密钥名称: TENCENT_SECRET_ID, TENCENT_SECRET_KEY</li>
+                  <li>• 支持实时语音评测</li>
+                </ul>
+              </div>
+              <div className="border-2 border-border p-4">
+                <h4 className="font-bold mb-2">阿里云智能语音</h4>
+                <ul className="space-y-1 text-muted-foreground">
+                  <li>• API端点: nls-gateway.cn-shanghai.aliyuncs.com</li>
+                  <li>• 密钥名称: ALIYUN_ACCESS_KEY_ID, ALIYUN_ACCESS_KEY_SECRET</li>
+                  <li>• 支持英语发音评测</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
         </Card>
 
         {models.length > 0 && (
